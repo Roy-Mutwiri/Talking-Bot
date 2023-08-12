@@ -19,3 +19,6 @@ def SpeakText(command):
     engine.say(command)
     engine.runAndWait()
 
+r = sr.Recognizer()
+
+def record_text():
