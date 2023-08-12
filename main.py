@@ -1,4 +1,5 @@
-import speech_recognition as sr
+
+'''import speech_recognition as sr
 import pyttsx3
 
 import os
@@ -7,11 +8,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-key = os.getenv("")
 
+'''
+import speech_recognition as sr
+import pyttsx3
 import openai
+from dotenv import load_dotenv
 
-openai.api_key = key
+load_dotenv()
+
+# Load your OpenAI API key from your environment variables
+openai.api_key = ("")
 
 
 def SpeakText(command):
@@ -19,52 +26,48 @@ def SpeakText(command):
     engine.say(command)
     engine.runAndWait()
 
-r = sr.Recognizer()
 
 def record_text():
-    while(1):
+    r = sr.Recognizer()
+    while True:
         try:
-
-            with sr.Microphone() as source2:
-                r.adjust_for_ambient_noise(source2, duration=0.2)
-
+            with sr.Microphone() as source:
+                r.adjust_for_ambient_noise(source, duration=0.2)
                 print("Listening")
-
-                audio2 = r.listen(source2)
-
-                MyText = r.recognize_google(audio2)
-
-                return MyText
-
+                audio = r.listen(source)
+                text = r.recognize_google(audio)
+                return text
         except sr.RequestError as e:
-            print(f"Could Not Request Results:  {0}" .format(e))
-
+            print(f"Could Not Request Results: {e}")
         except sr.UnknownValueError:
             print("Unknown Error Occurred")
 
 
-def send_to_chatGPT(messages, model = "gpt-3.5-turbo"):
-
+def send_to_chatGPT(messages, model="gpt-3.5-turbo"):
     response = openai.ChatCompletion.create(
-
         model=model,
         messages=messages,
         max_tokens=100,
         n=1,
         stop=None,
-        temperature=0.5
-
+        temperature=0.5,
     )
-
-    message = response.choices[0].message.content
-    messages.append(response.choices[0].message)
+    message = response.choices[0].message['content']
     return message
 
-messages = []
-while(1):
-    text = record_text()
-    messages.append({"role": "user", "content": text})
-    response = send_to_chatGPT(messages)
-    SpeakText(response)
+
+def main():
+    messages = [{"role": "user", "content": "Please act like Jarvis from Iron man."}]
+
+    while True:
+        text = record_text()
+        messages.append({"role": "user", "content": text})
+
+        response = send_to_chatGPT(messages)
+        SpeakText(response)
+
+        print(response)
 
 
+if __name__ == "__main__":
+    main()
